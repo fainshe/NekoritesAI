@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue';
 import SunIcon from '../assets/icons/SunIcon.vue';
 import MoonIcon from '../assets/icons/MoonIcon.vue';
 import MenuIcon from '../assets/icons/MenuIcon.vue';
+import config from '../config.js';
 
 const props = defineProps({
   models: Array,
@@ -28,8 +29,8 @@ onMounted(() => {
           <MenuIcon />
       </button>
       <h1 class="header-title" :class="{ 'is-shrunk': !isTitleExpanded }">
-        <span v-if="isTitleExpanded">Nekorites AI</span>
-        <span v-else>N.AI</span>
+        <span v-if="isTitleExpanded">{{ config.aiName }}</span>
+        <span v-else>{{ config.shortAiName }}</span>
       </h1>
     </div>
 
@@ -39,7 +40,7 @@ onMounted(() => {
           :value="activeModel"
           @change="$emit('changeModel', $event.target.value)"
         >
-          <option v-for="model in models" :key="model" :value="model">{{ model }}</option>
+          <option v-for="model in models" :key="model.id" :value="model.id">{{ model.name }}</option>
         </select>
       </div>
       <button class="icon-button" @click="$emit('toggleTheme')">

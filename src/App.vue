@@ -4,12 +4,13 @@ import Cookies from 'js-cookie';
 import Sidebar from './components/Sidebar.vue';
 import ChatWindow from './components/ChatWindow.vue';
 import Header from './components/Header.vue';
+import config from './config.js';
 
 const sessions = reactive({});
 const activeSessionId = ref(null);
 const theme = ref('dark'); 
-const models = ['Default', 'Yandere'];
-const activeModel = ref(models[0]);
+const models = config.models;
+const activeModel = ref(models[0].id);
 const isSidebarOpen = ref(false); 
 
 const generateSessionId = () => `session_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
@@ -54,10 +55,10 @@ const switchSession = (sessionId) => {
   }
 };
 
-const changeModel = (model) => {
-  activeModel.value = model;
+const changeModel = (modelId) => {
+  activeModel.value = modelId;
   if (activeSessionId.value && sessions[activeSessionId.value]) {
-    sessions[activeSessionId.value].model = model;
+    sessions[activeSessionId.value].model = modelId;
   }
 };
 
@@ -66,7 +67,6 @@ const toggleTheme = () => {
   document.body.className = `${theme.value}-mode`;
   localStorage.setItem('chatbot-theme', theme.value);
   
-  // Update CSS custom properties for adaptive stars
   updateStarsTheme();
 };
 
@@ -74,7 +74,6 @@ const updateStarsTheme = () => {
   const root = document.documentElement;
   
   if (theme.value === 'dark') {
-    // Dark mode - white stars on black background (reduced density)
     root.style.setProperty('--empty-chat-bg', '#000000');
     
     root.style.setProperty('--stars-pattern', `
@@ -103,7 +102,6 @@ const updateStarsTheme = () => {
     root.style.setProperty('--stars-opacity-low', '0.4');
     root.style.setProperty('--stars-opacity-high', '1');
   } else {
-    // Light mode - black stars on white background (reduced density)
     root.style.setProperty('--empty-chat-bg', '#ffffff');
     
     root.style.setProperty('--stars-pattern', `
@@ -145,7 +143,6 @@ onMounted(() => {
   }
   document.body.className = `${theme.value}-mode`;
   
-  // Initialize stars theme
   updateStarsTheme();
 
   const savedSessions = Cookies.get('chat-sessions');
@@ -202,7 +199,7 @@ watch(sessions, (newSessions) => {
         @update-session-name="updateSessionName"
       />
       <div v-else class="no-chat-selected">
-          <h1>Welcome to Nekorites AI</h1>
+          <h1>Welcome to {{ config.aiName }}</h1>
           <p>Start a new conversation from the sidebar.</p>
       </div>
     </div>

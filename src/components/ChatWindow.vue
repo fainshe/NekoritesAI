@@ -4,6 +4,7 @@ import SendIcon from '../assets/icons/SendIcon.vue';
 import LikeIcon from '../assets/icons/LikeIcon.vue';
 import CopyIcon from '../assets/icons/CopyIcon.vue';
 import RetryIcon from '../assets/icons/RetryIcon.vue';
+import config from '../config.js';
 
 const props = defineProps({
   session: Object,
@@ -30,7 +31,6 @@ const sendMessage = async () => {
   const message = userMessage.value;
   userMessage.value = '';
 
-  // Check if this is the first user message and update session name
   if (props.session.messages.length === 0) {
     const sessionName = message.length > 30 ? message.substring(0, 30) + '...' : message;
     emit('update-session-name', props.session.id, sessionName);
@@ -50,11 +50,20 @@ const processAIResponse = async (message) => {
   scrollToBottom();
 
   const sessionId = props.session.id;
-  const model = props.session.model;
-  const baseUrl = model === 'Yandere' 
-    ? 'https://backend-serv-774.fainshe.tech/api/v2/Yachat'
-    : 'https://backend-serv-774.fainshe.tech/api/v2/chat';
-  const apiUrl = `${baseUrl}?message=${encodeURIComponent(message)}&sessionId=${sessionId}`;
+  const modelId = props.session.model;
+  const activeModel = config.models.find(m => m.id === modelId);
+
+  if (!activeModel) {
+    console.error(`Model with id "${modelId}" not found in config.js`);
+    props.session.messages.push({
+      sender: 'ai',
+      text: 'Error: Model configuration not found.',
+    });
+    isTyping.value = false;
+    return;
+  }
+
+  const apiUrl = `${activeModel.endpoint}?message=${encodeURIComponent(message)}&sessionId=${sessionId}`;
 
   try {
     const response = await fetch(apiUrl);
@@ -63,15 +72,12 @@ const processAIResponse = async (message) => {
     }
     const data = await response.json();
     
-    // --- PERUBAHAN DI SINI ---
-    // Mengambil teks dari struktur JSON yang baru
     const aiText = data.jawaban?.[0]?.content?.parts?.[0]?.text || "Maaf, saya tidak dapat memproses respons.";
     
     props.session.messages.push({
       sender: 'ai',
       text: aiText,
     });
-    // --- AKHIR PERUBAHAN ---
 
   } catch (error) {
     console.error("API Error:", error);
@@ -136,7 +142,7 @@ const copyToClipboard = (text) => {
           <SendIcon />
         </button>
       </div>
-      <p class="footer-text">Nekorites AI bisa membuat kesalahan. Mohon untuk tidak terlalu serius dan jaga kewarasan.</p>
+      <p class="footer-text">{{ config.aiName }} bisa membuat kesalahan. {{ config.alertAIText }}</p>
     </div>
   </main>
 </template>
