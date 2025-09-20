@@ -4,13 +4,14 @@ import Cookies from 'js-cookie';
 import Sidebar from './components/Sidebar.vue';
 import ChatWindow from './components/ChatWindow.vue';
 import Header from './components/Header.vue';
-import config from './config.js';
+import { useConfig } from './composables/useConfig.js';
+
+const { aiName, models, getFirstModelId } = useConfig();
 
 const sessions = reactive({});
 const activeSessionId = ref(null);
 const theme = ref('dark'); 
-const models = config.models;
-const activeModel = ref(models[0].id);
+const activeModel = ref(getFirstModelId());
 const isSidebarOpen = ref(false); 
 
 const generateSessionId = () => `session_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
@@ -199,7 +200,7 @@ watch(sessions, (newSessions) => {
         @update-session-name="updateSessionName"
       />
       <div v-else class="no-chat-selected">
-          <h1>Welcome to {{ config.aiName }}</h1>
+          <h1>Welcome to {{ aiName }}</h1>
           <p>Start a new conversation from the sidebar.</p>
       </div>
     </div>

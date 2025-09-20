@@ -3,7 +3,9 @@ import { ref, onMounted } from 'vue';
 import SunIcon from '../assets/icons/SunIcon.vue';
 import MoonIcon from '../assets/icons/MoonIcon.vue';
 import MenuIcon from '../assets/icons/MenuIcon.vue';
-import config from '../config.js';
+import { useConfig } from '../composables/useConfig.js';
+
+const { aiName, shortAiName } = useConfig();
 
 const props = defineProps({
   models: Array,
@@ -29,8 +31,8 @@ onMounted(() => {
           <MenuIcon />
       </button>
       <h1 class="header-title" :class="{ 'is-shrunk': !isTitleExpanded }">
-        <span v-if="isTitleExpanded">{{ config.aiName }}</span>
-        <span v-else>{{ config.shortAiName }}</span>
+        <span v-if="isTitleExpanded">{{ aiName }}</span>
+        <span v-else>{{ shortAiName }}</span>
       </h1>
     </div>
 

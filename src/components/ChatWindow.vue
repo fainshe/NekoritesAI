@@ -4,7 +4,9 @@ import SendIcon from '../assets/icons/SendIcon.vue';
 import LikeIcon from '../assets/icons/LikeIcon.vue';
 import CopyIcon from '../assets/icons/CopyIcon.vue';
 import RetryIcon from '../assets/icons/RetryIcon.vue';
-import config from '../config.js';
+import { useConfig } from '../composables/useConfig.js';
+
+const { aiName, alertAIText, getModelById } = useConfig();
 
 const props = defineProps({
   session: Object,
@@ -51,10 +53,10 @@ const processAIResponse = async (message) => {
 
   const sessionId = props.session.id;
   const modelId = props.session.model;
-  const activeModel = config.models.find(m => m.id === modelId);
+  const activeModel = getModelById(modelId);
 
   if (!activeModel) {
-    console.error(`Model with id "${modelId}" not found in config.js`);
+    console.error(`Model with id "${modelId}" not found in configuration`);
     props.session.messages.push({
       sender: 'ai',
       text: 'Error: Model configuration not found.',
@@ -142,7 +144,7 @@ const copyToClipboard = (text) => {
           <SendIcon />
         </button>
       </div>
-      <p class="footer-text">{{ config.aiName }} bisa membuat kesalahan. {{ config.alertAIText }}</p>
+      <p class="footer-text">{{ aiName }} bisa membuat kesalahan. {{ alertAIText }}</p>
     </div>
   </main>
 </template>
